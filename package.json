@@ -1,0 +1,37 @@
+{
+  "name": "rsa-keypair",
+  "version": "1.0.0",
+  "description": "Generate native openssl RSA keypair",
+  "main": "build/Release/rsa_keypair.node",
+  "scripts": {
+    "test": "mocha -R spec"
+  },
+  "repository": "sunjith/node-rsa-keypair",
+  "keywords": [
+    "rsa",
+    "openssl",
+    "native",
+    "keygen",
+    "generate",
+    "keypair"
+  ],
+  "author": {
+    "name": "sunjith"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sunjith/node-rsa-keypair/issues"
+  },
+  "homepage": "https://github.com/sunjith/node-rsa-keypair",
+  "dependencies": {
+    "nan": "~2.10.0"
+  },
+  "devDependencies": {
+    "mocha": "^5.2.0",
+    "should": "^13.2.1"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "gypfile": true
+}

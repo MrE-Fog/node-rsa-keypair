@@ -1,0 +1,11 @@
+.DS_Store
+*~
+*.swp
+*.log
+yarn.lock
+
+node_modules/
+build/
+.vscode
+
+npm-debug.log
