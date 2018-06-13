@@ -7,8 +7,9 @@ describe("rsa-keypair", function() {
   describe("when generating keys", function() {
     var keys;
 
-    before(function() {
+    before(function(done) {
       keys = rsaKeyPair.generate();
+      done();
     });
 
     it("should generate valid keys", function() {
@@ -31,7 +32,7 @@ describe("rsa-keypair", function() {
         var ciphered = null,
           deciphered = null;
 
-        before(function() {
+        before(function(done) {
           ciphered = crypto.publicEncrypt(
             {
               key: keys.publicKey,
@@ -47,6 +48,8 @@ describe("rsa-keypair", function() {
             },
             ciphered
           );
+
+          done();
         });
 
         it("should be able to encrypt", function() {
@@ -69,8 +72,9 @@ describe("rsa-keypair", function() {
     var keys,
       passPhrase = "test pass phrase";
 
-    before(function() {
+    before(function(done) {
       keys = rsaKeyPair.generate(4096, 65537, passPhrase);
+      done();
     });
 
     it("should generate valid keys", function() {
@@ -93,7 +97,7 @@ describe("rsa-keypair", function() {
         var ciphered = null,
           deciphered = null;
 
-        before(function() {
+        before(function(done) {
           ciphered = crypto.privateEncrypt(
             {
               key: keys.privateKey,
@@ -110,6 +114,8 @@ describe("rsa-keypair", function() {
             },
             ciphered
           );
+
+          done();
         });
 
         it("should be able to encrypt", function() {
