@@ -12,7 +12,7 @@ Thanks to all the developers who have contributed to the above projects.
 
 ## History
 
-As from node 0.11 the `crypto` library has `publicEncrypt` and `privateDecrypt` functions, we don't need to rely on any external libraries for public-key cryptography.
+The node `crypto` library has encrypt and decrypt functions, we don't need to rely on any external libraries for public-key cryptography.
 
 ## Usage
 
