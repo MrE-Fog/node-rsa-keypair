@@ -1,6 +1,6 @@
 # node-rsa-keypair
 
-[![NPM version][npm-image]][npm-url] [![Dependency Status][daviddm-image]][daviddm-url]
+[![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-image]][daviddm-url]
 
 Generates a RSA keypair using native OpenSSL library.
 
@@ -102,5 +102,7 @@ var privateKeyStr = keys.privateKey.toString();
 
 [npm-image]: https://badge.fury.io/js/rsa-keypair.svg
 [npm-url]: https://npmjs.org/package/rsa-keypair
+[travis-image]: https://travis-ci.org/sunjith/node-rsa-keypair.svg?branch=master
+[travis-url]: https://travis-ci.org/sunjith/node-rsa-keypair
 [daviddm-image]: https://david-dm.org/sunjith/node-rsa-keypair.svg?theme=shields.io
 [daviddm-url]: https://david-dm.org/sunjith/node-rsa-keypair
