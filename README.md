@@ -1,6 +1,6 @@
 # node-rsa-keypair
 
-[![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-image]][daviddm-url]
+[![NPM version][npm-image]][npm-url] [![MIT License][license-image]][license-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-image]][daviddm-url]
 
 Generates a RSA keypair using native OpenSSL library.
 
@@ -35,6 +35,19 @@ var rsaKeyPair = require("rsa-keypair");
 var keys = rsaKeyPair.generate();
 ```
 
+## API
+
+```javascript
+/**
+ * Generate RSA key pair.
+ * @param {Number} modulusBits - The RSA key size. Minimum: 512, default: 2048.
+ * @param {Number} exponent - The public exponent. Should be relatively prime to p-1 for all primes p which divide the modulus. Default: 65537.
+ * @param {String} passPhrase - The pass phrase to encrypt the RSA private key. If not specified the private key shall be unencrypted. Even passing an empty string will cause the private key to be encrypted. Default: no pass phrase.
+ * @return {Object} The object containing the private key in property 'privateKey' and the public key in property 'publicKey'. Note: if 'passPhrase' was passed to encrypt the private key, it is not retuned in the result object.
+ */
+function generate(modulusBits, exponent, passPhrase);
+```
+
 ## Examples
 
 ```javascript
@@ -44,18 +57,18 @@ var rsaKeyPair = require("rsa-keypair");
 var keys = rsaKeyPair.generate();
 
 var result = crypto.publicEncrypt(
-  {
-    key: keys.publicKey
-  },
-  new Buffer("Hello world!")
+ {
+  key: keys.publicKey
+ },
+ new Buffer("Hello world!")
 );
 // <Crypted Buffer>
 
 var plaintext = crypto.privateDecrypt(
-  {
-    key: keys.privateKey
-  },
-  result
+ {
+  key: keys.privateKey
+ },
+ result
 );
 // Hello world!
 ```
@@ -68,21 +81,21 @@ var keys = rsaKeyPair.generate(4096, 65537, "top secret");
 // Generates a 4096-bit RSA key pair with "top secret" as the pass phrase to encrypt the private key
 
 var result = crypto.privateEncrypt(
-  {
-    key: keys.privateKey,
-    passphrase: "top secret",
-    padding: crypto.constants.RSA_PKCS1_PADDING
-  },
-  new Buffer("Hello world!")
+ {
+  key: keys.privateKey,
+  passphrase: "top secret",
+  padding: crypto.constants.RSA_PKCS1_PADDING
+ },
+ new Buffer("Hello world!")
 );
 // <Crypted Buffer>
 
 var plaintext = crypto.publicDecrypt(
-  {
-    key: keys.publicKey,
-    padding: crypto.constants.RSA_PKCS1_PADDING
-  },
-  result
+ {
+  key: keys.publicKey,
+  padding: crypto.constants.RSA_PKCS1_PADDING
+ },
+ result
 );
 // Hello world!
 ```
@@ -102,6 +115,8 @@ var privateKeyStr = keys.privateKey.toString();
 
 [npm-image]: https://badge.fury.io/js/rsa-keypair.svg
 [npm-url]: https://npmjs.org/package/rsa-keypair
+[license-image]: http://img.shields.io/badge/license-MIT-blue.svg?style=flat
+[license-url]: LICENSE
 [travis-image]: https://travis-ci.com/sunjith/node-rsa-keypair.svg?branch=master
 [travis-url]: https://travis-ci.com/sunjith/node-rsa-keypair
 [daviddm-image]: https://david-dm.org/sunjith/node-rsa-keypair.svg?theme=shields.io
