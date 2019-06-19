@@ -1,12 +1,10 @@
-#include <node.h>
-#include <nan.h>
-#include <v8.h>
+#include <node_api.h>
+
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <openssl/pem.h>
 
-using namespace v8;
-using namespace node;
+#define PASSPHRASE_LEN 100
 
 static RSA *generateKey(int num, unsigned long e)
 {
@@ -46,67 +44,61 @@ static RSA *generateKey(int num, unsigned long e)
 #endif
 }
 
-static Nan::MaybeLocal<Object> toBuffer(BIO *bio)
+napi_value Generate(napi_env env, napi_callback_info info)
 {
-	char *data;
-	long length = BIO_get_mem_data(bio, &data);
-
-	return Nan::CopyBuffer(data, length);
-}
-
-void Generate(const Nan::FunctionCallbackInfo<v8::Value> &info)
-{
-	Nan::HandleScope scope;
-
-	int modulusBits = 2048;
-	int exponent = 65537;
-	int passPhraseLength = 0;
-	char *passPhrase = NULL;
+	size_t argc = 3, passPhraseLength = 0;
+	napi_value argv[3], publicKey, privateKey, result;
+	napi_status status;
+	int modulusBits = 2048, exponent = 65537, number = 0, success = 0;
+	char passPhrase[PASSPHRASE_LEN], *data = NULL;
+	long length = 0;
+	void *out;
 	const EVP_CIPHER *cipher = NULL;
 
-	if (info[0]->IsInt32())
+	status = napi_get_cb_info(env, info, &argc, argv, NULL, NULL);
+	if (napi_ok != status)
 	{
-		modulusBits = Nan::To<v8::Int32>(info[0]).ToLocalChecked()->Value();
+		napi_throw_error(env, NULL, "Failed to parse arguments");
 	}
 
-	if (info[1]->IsInt32())
+	// module bits param
+	status = napi_get_value_int32(env, argv[0], &number);
+	if (napi_ok == status)
 	{
-		exponent = Nan::To<v8::Int32>(info[1]).ToLocalChecked()->Value();
+		modulusBits = number;
+		if (modulusBits < 512)
+		{
+			napi_throw_type_error(env, NULL, "Expected modulus bit count bigger than 512.");
+		}
 	}
 
-	if (info[2]->IsString())
+	// exponent param
+	status = napi_get_value_int32(env, argv[1], &number);
+	if (napi_ok == status)
 	{
-		v8::Local<v8::String> passPhraseStr = info[2]->ToString();
-		passPhraseLength = passPhraseStr->Length();
-		passPhrase = new char[passPhraseLength + 1];
-		passPhraseLength = passPhraseStr->WriteOneByte(reinterpret_cast<unsigned char *>(passPhrase));
+		exponent = number;
+		if (exponent < 0)
+		{
+			napi_throw_type_error(env, NULL, "Expected positive exponent.");
+		}
+		if ((exponent & 1) == 0)
+		{
+			napi_throw_type_error(env, NULL, "Expected odd exponent.");
+		}
+	}
+
+	// pass phrase param
+	status = napi_get_value_string_utf8(env, argv[2], passPhrase, PASSPHRASE_LEN, &passPhraseLength);
+	if (napi_ok == status)
+	{
 		cipher = (EVP_CIPHER *)EVP_des_ede3_cbc();
-	}
-
-	if (modulusBits < 512)
-	{
-		Nan::ThrowTypeError("Expected modulus bit count bigger than 512.");
-		return;
-	}
-
-	if (exponent < 0)
-	{
-		Nan::ThrowTypeError("Expected positive exponent.");
-		return;
-	}
-
-	if ((exponent & 1) == 0)
-	{
-		Nan::ThrowTypeError("Expected odd exponent.");
-		return;
 	}
 
 	RSA *rsa = generateKey(modulusBits, (unsigned int)exponent);
 
 	if (!rsa)
 	{
-		Nan::ThrowError("Failed creating RSA context.");
-		return;
+		napi_throw_error(env, NULL, "Failed creating RSA context.");
 	}
 
 	BIO *publicBio = BIO_new(BIO_s_mem());
@@ -118,16 +110,12 @@ void Generate(const Nan::FunctionCallbackInfo<v8::Value> &info)
 		{
 			BIO_vfree(publicBio);
 		}
-
 		if (privateBio)
 		{
 			BIO_vfree(privateBio);
 		}
-
 		RSA_free(rsa);
-
-		Nan::ThrowError("Failed to allocate OpenSSL buffers.");
-		return;
+		napi_throw_error(env, NULL, "Failed to allocate OpenSSL buffers.");
 	}
 
 	if (!PEM_write_bio_RSA_PUBKEY(publicBio, rsa))
@@ -135,47 +123,79 @@ void Generate(const Nan::FunctionCallbackInfo<v8::Value> &info)
 		BIO_vfree(publicBio);
 		BIO_vfree(privateBio);
 		RSA_free(rsa);
-
-		Nan::ThrowError("Failed exporting public key.");
-		return;
+		napi_throw_error(env, NULL, "Failed exporting public key.");
 	}
 
-	if (!PEM_write_bio_RSAPrivateKey(privateBio, rsa, cipher, (unsigned char *)passPhrase, passPhraseLength, NULL, NULL))
+	if (passPhraseLength > 0)
+	{
+		success = PEM_write_bio_RSAPrivateKey(privateBio, rsa, cipher, (unsigned char *)passPhrase, (int)passPhraseLength, NULL, NULL);
+	}
+	else
+	{
+		success = PEM_write_bio_RSAPrivateKey(privateBio, rsa, cipher, NULL, 0, NULL, NULL);
+	}
+	if (!success)
 	{
 		BIO_vfree(publicBio);
 		BIO_vfree(privateBio);
 		RSA_free(rsa);
-		if (NULL != passPhrase)
-		{
-			delete[] passPhrase;
-		}
-
-		Nan::ThrowError("Failed exporting private key.");
-		return;
+		napi_throw_error(env, NULL, "Failed exporting private key.");
 	}
 
-	Nan::MaybeLocal<Object> publicKey = toBuffer(publicBio);
-	Nan::MaybeLocal<Object> privateKey = toBuffer(privateBio);
+	length = BIO_get_mem_data(publicBio, &data);
+	status = napi_create_buffer_copy(env, length, (void *)data, &out, &publicKey);
+	if (napi_ok != status)
+	{
+		BIO_vfree(publicBio);
+		BIO_vfree(privateBio);
+		RSA_free(rsa);
+		napi_throw_error(env, NULL, "Failed writing public key.");
+	}
+
+	length = BIO_get_mem_data(privateBio, &data);
+	status = napi_create_buffer_copy(env, length, (void *)data, &out, &privateKey);
+	if (napi_ok != status)
+	{
+		BIO_vfree(publicBio);
+		BIO_vfree(privateBio);
+		RSA_free(rsa);
+		napi_throw_error(env, NULL, "Failed writing private key.");
+	}
 
 	BIO_vfree(publicBio);
 	BIO_vfree(privateBio);
 	RSA_free(rsa);
-	if (NULL != passPhrase)
+
+	status = napi_create_object(env, &result);
+	if (napi_ok != status)
 	{
-		delete[] passPhrase;
+		napi_throw_error(env, NULL, "Failed creating result.");
 	}
 
-	Local<Object> result = Nan::New<Object>();
+	status = napi_set_named_property(env, result, "publicKey", publicKey);
+	if (napi_ok != status)
+	{
+		napi_throw_error(env, NULL, "Failed adding publicKey to result.");
+	}
 
-	Nan::Set(result, Nan::New<String>("publicKey").ToLocalChecked(), publicKey.ToLocalChecked());
-	Nan::Set(result, Nan::New<String>("privateKey").ToLocalChecked(), privateKey.ToLocalChecked());
+	status = napi_set_named_property(env, result, "privateKey", privateKey);
+	if (napi_ok != status)
+	{
+		napi_throw_error(env, NULL, "Failed adding privateKey to result.");
+	}
 
-	info.GetReturnValue().Set(result);
+	return result;
 }
 
-void InitAll(Handle<Object> exports)
+napi_value Init(napi_env env, napi_value exports)
 {
-	Nan::Set(exports, Nan::New<String>("generate").ToLocalChecked(), Nan::GetFunction(Nan::New<FunctionTemplate>(Generate)).ToLocalChecked());
+	napi_status status;
+	napi_property_descriptor desc =
+			{"generate", NULL, Generate, NULL, NULL, NULL, napi_default, NULL};
+	status = napi_define_properties(env, exports, 1, &desc);
+	if (status != napi_ok)
+		return NULL;
+	return exports;
 }
 
-NODE_MODULE(rsa_keypair, InitAll)
+NAPI_MODULE(NODE_GYP_MODULE_NAME, Init);

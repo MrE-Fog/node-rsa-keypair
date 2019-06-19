@@ -28,7 +28,7 @@ describe("rsa-keypair", function() {
 
     if (crypto.publicEncrypt && crypto.privateDecrypt) {
       describe("when using the private key", function() {
-        var plaintext = new Buffer("test message");
+        var plaintext = Buffer.from("test message");
         var ciphered = null,
           deciphered = null;
 
@@ -68,6 +68,7 @@ describe("rsa-keypair", function() {
       });
     }
   });
+
   describe("when generating encrypted keys", function() {
     var keys,
       passPhrase = "test pass phrase";
@@ -93,7 +94,7 @@ describe("rsa-keypair", function() {
 
     if (crypto.publicEncrypt && crypto.privateDecrypt) {
       describe("when using the private key", function() {
-        var plaintext = new Buffer("test message");
+        var plaintext = Buffer.from("test message");
         var ciphered = null,
           deciphered = null;
 

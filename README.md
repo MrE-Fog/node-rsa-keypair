@@ -10,6 +10,14 @@ This code is loosely based on [ursa](https://github.com/Medium/ursa) RSA generat
 
 Thanks to all the developers who have contributed to the above projects.
 
+## Upgrade Notes
+
+Version 2.x uses N-API. For older node versions that do not support N-API, use version 1.0.1:
+
+```sh
+npm install --save rsa-keypair@1.0.1
+```
+
 ## History
 
 The node `crypto` library has encrypt and decrypt functions, we don't need to rely on any external libraries for public-key cryptography.
@@ -33,6 +41,13 @@ Use in your code:
 ```javascript
 var rsaKeyPair = require("rsa-keypair");
 var keys = rsaKeyPair.generate();
+```
+
+ES6:
+
+```javascript
+import rsaKeyPair from "rsa-keypair";
+const keys = rsaKeyPair.generate();
 ```
 
 ## API
@@ -112,6 +127,24 @@ var publicKeyStr = keys.publicKey.toString();
 var privateKeyStr = keys.privateKey.toString();
 // The encrypted private key in PEM format which may be written to a file
 ```
+
+## Develop
+
+```sh
+git clone https://github.com/sunjith/node-rsa-keypair
+cd node-rsa-keypair
+
+# Install dependencies and build
+npm install
+
+# Build only
+npm start
+
+# Run tests
+npm run test
+```
+
+
 
 [npm-image]: https://badge.fury.io/js/rsa-keypair.svg
 [npm-url]: https://npmjs.org/package/rsa-keypair

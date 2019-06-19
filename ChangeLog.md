@@ -1,5 +1,8 @@
 # ChangeLog
 
+## 2.0.0 - June 19, 2019
+1. Migrate to N-API
+
 ## 1.0.1 - June 15, 2018
 
 1. Add generate function documentation.
