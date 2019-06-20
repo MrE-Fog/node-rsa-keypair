@@ -1,6 +1,6 @@
 {
   "name": "rsa-keypair",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Generate native openssl RSA keypair",
   "main": "build/Release/rsa_keypair.node",
   "scripts": {
