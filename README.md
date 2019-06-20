@@ -10,9 +10,13 @@ This code is loosely based on [ursa](https://github.com/Medium/ursa) RSA generat
 
 Thanks to all the developers who have contributed to the above projects.
 
+## N-API Example
+
+The module and code also serves as a simple example to create native addon module in C/C++ using [N-API](https://nodejs.org/api/n-api.html).
+
 ## Upgrade Notes
 
-Version 2.x uses N-API. For older node versions that do not support N-API, use version 1.0.1:
+Version 2.x uses [N-API](https://nodejs.org/api/n-api.html). For older node versions that do not support [N-API](https://nodejs.org/api/n-api.html), use version 1.0.1:
 
 ```sh
 npm install --save rsa-keypair@1.0.1
@@ -134,6 +138,7 @@ var privateKeyStr = keys.privateKey.toString();
 git clone https://github.com/sunjith/node-rsa-keypair
 cd node-rsa-keypair
 
+# Note: You may use yarn instead of npm in each of the following commands
 # Install dependencies and build
 npm install
 
@@ -143,8 +148,6 @@ npm start
 # Run tests
 npm run test
 ```
-
-
 
 [npm-image]: https://badge.fury.io/js/rsa-keypair.svg
 [npm-url]: https://npmjs.org/package/rsa-keypair
