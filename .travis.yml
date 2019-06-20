@@ -13,6 +13,7 @@ install:
   - $CXX --version
   - npm install
 node_js:
+  - "12"
   - "10"
   - "8"
   - "6"
