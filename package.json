@@ -5,6 +5,7 @@
   "main": "build/Release/rsa_keypair.node",
   "scripts": {
     "start": "node-gyp configure build",
+    "clean": "node-gyp clean",
     "test": "mocha -R spec"
   },
   "repository": "sunjith/node-rsa-keypair",
@@ -27,7 +28,7 @@
   "homepage": "https://github.com/sunjith/node-rsa-keypair",
   "dependencies": {},
   "devDependencies": {
-    "mocha": "^6.1.4",
+    "mocha": "^8.0.1",
     "should": "^13.2.3"
   },
   "engines": {
